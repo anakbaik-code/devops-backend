@@ -3,6 +3,7 @@ FROM golang:1.27 AS builder
 WORKDIR /app
 COPY go.mod ./
 COPY main.go ./
+COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o main .
 
 # Stage 2: Minimal runner image
