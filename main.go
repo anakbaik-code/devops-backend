@@ -5,15 +5,22 @@ import (
 	"go-backend/handler"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	_ = godotenv.Load()
+
 	// Endpoint API: /api/hello
 	http.HandleFunc("/api/hello", handler.HelloHandler)
 
 	// Endpoint health check
-	http.HandleFunc("/api/health",handler.HealthHandler)
+	http.HandleFunc("/api/health", handler.HealthHandler)
 
-	fmt.Println("Server Go berjalan di port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	addr := fmt.Sprintf(":%s", port)
+	log.Printf("Server Berjalan Di Port %s ... ", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
