@@ -30,12 +30,17 @@ jobs:
         run: |
           docker compose \
           -f infra/docker-compose.yaml \
-          pull backend
-
-          docker compose \
-          -f infra/docker-compose.yaml \
-          up -d backend
+          up -d \
+          --pull always \
+          app-backend-1 \
+          app-backend-2 \
+          app-backend-3
 
       - name: Check Backend
         run: |
-          docker compose ps backend
+          docker compose \
+          -f infra/docker-compose.yaml \
+          ps \
+          app-backend-1 \
+          app-backend-2 \
+          app-backend-3
