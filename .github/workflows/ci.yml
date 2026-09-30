@@ -90,7 +90,7 @@ jobs:
       - name: Trigger Infra Deployment
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.INFRA_TOKEN }}
+          token: ${{ secrets.INFRA_DEPLOY_TOKEN }}
           repository: anakbaik-code/devops-infra
           event-type: deploy
       
