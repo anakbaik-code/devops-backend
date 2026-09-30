@@ -1,56 +1,55 @@
 name: CI-Backend
 
-on:
+'on':
   push:
     branches:
       - main
-  pull_request: 
-    branches: 
+  pull_request:
+    branches:
       - main
+
 jobs:
-  lint-and-scan :
+  lint-and-scan:
     runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
           cache: true
 
-      - name : Download Dependency
-        run : go mod download
+      - name: Download Dependency
+        run: go mod download
 
-      - name: Run Vulnerability Check(govulncheck)
+      - name: Run Vulnerability Check (govulncheck)
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
-  
-  testing :
+          "$(go env GOPATH)/bin/govulncheck" ./...
+
+  testing:
     runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
-      - name: Setup go
+
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
           cache: true
-      
+
       - name: Download Dependency
-        run : go mod download
-      
+        run: go mod download
+
       - name: Run Unit Test With Race Detector
         run: go test -v -race -coverprofile=coverage.out ./...
-      
-      
-      
-  build-image :
+
+  build-image:
     name: Build & Push image
-    needs: 
+    needs:
       - lint-and-scan
       - testing
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -59,7 +58,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -68,9 +67,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Extract Metadata (Tags & Labels)
         id: meta
@@ -88,8 +84,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha # Cache layer Docker menggunakan GitHub Actions Cache
+          cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Trigger Infra Deployment
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.INFRA_TOKEN }}
+          repository: anakbaik-code/devops-infra
+          event-type: deploy
       
 
