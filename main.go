@@ -19,7 +19,7 @@ func main() {
 	// Endpoint health check
 	http.HandleFunc("/api/health", handler.HealthHandler)
 
-	port := os.Getenv("PORT")
+	port := os.Getenv("BACKEND_PORT")
 	addr := fmt.Sprintf(":%s", port)
 	log.Printf("Server Berjalan Di Port %s ... ", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
